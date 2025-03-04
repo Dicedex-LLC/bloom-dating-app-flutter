@@ -2,4 +2,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.24.1 # Check for the latest version on pub.dev
+  firebase_core: ^2.24.1 # Or your version
+  animated_text_kit: ^4.2.2 # Or latest version from pub.dev
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
