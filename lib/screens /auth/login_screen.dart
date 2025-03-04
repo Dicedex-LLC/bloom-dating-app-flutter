@@ -7,6 +7,7 @@ import 'package:bloom_app/screens/auth/signup_screen.dart'; // Example: Navigati
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful login
 import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
 import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuthException
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,6 +30,15 @@ class LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+import 'package:flutter/material.dart';
+// ... other imports
+import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuthException
+
+class LoginScreenState extends State<LoginScreen> {
+  // ... form keys, controllers, etc.
+
+  final AuthService _authService = AuthService(); // Instantiate AuthService
 
   // Function to handle login process using Firebase Auth
   Future<void> _login() async {
@@ -37,40 +47,78 @@ class LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Call AuthService to sign in with email and password
-      User? user = await _authService.signInWithEmailAndPassword(
-        _emailController.text.trim(), // Trim whitespace from email
-        _passwordController.text.trim(), // Trim whitespace from password
-      );
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (user != null) {
-        // Sign in successful
-        print('Login successful. User UID: ${user.uid}');
-        // Navigate to Home Screen after successful login
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
+      try {
+        User? user = await _authService.signInWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
         );
-      } else {
-        // Sign in failed (error handled in AuthService and printed to console)
-        // You can show an error message to the user here (we'll add error display improvements later)
-        print('Login failed.'); // For now, just print to console
-        // Optionally, display a SnackBar or AlertDialog to inform user of login failure
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login failed. Please check your credentials and try again.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (user != null) {
+          // Sign in successful
+          print('Login successful. User UID: ${user.uid}');
+          // Navigate to Home Screen after successful login
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // Sign in failed (generic failure - should ideally not reach here with error handling below)
+          _showSnackBar('Login failed. Please check your credentials and try again.', Colors.redAccent);
+          print('Login failed (generic - user null returned).');
+        }
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        String errorMessage = 'Login failed. Please try again later.'; // Default generic error message
+
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = 'User not found. Please check your email or sign up.';
+            break;
+          case 'wrong-password':
+            errorMessage = 'Incorrect password. Please try again.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'Invalid email format. Please check your email.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This account has been disabled.';
+            break;
+          // Add more cases for other Firebase Auth error codes you want to handle specifically
+          default:
+            print('Unhandled Firebase Auth error code during login: ${e.code}');
+            // Keep default generic error message for unhandled codes
+            break;
+        }
+        _showSnackBar(errorMessage, Colors.redAccent); // Show specific error message in SnackBar
+        print('Firebase Auth Signin Error: ${e.code} - ${e.message}'); // Keep logging detailed error for debugging
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showSnackBar('An unexpected error occurred during login. Please try again later.', Colors.redAccent); // Generic error SnackBar
+        print('Generic Signin Error: $e'); // Log generic error
       }
     }
   }
 
+  // Helper function to show SnackBar
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
   // ... rest of the LoginScreenState code (build method, etc.)
 }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
