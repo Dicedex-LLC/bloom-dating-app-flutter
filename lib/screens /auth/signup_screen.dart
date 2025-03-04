@@ -4,6 +4,7 @@ import 'package:bloom_app/constants/app_strings.dart';
 import 'package:bloom_app/screens/auth/login_screen.dart'; // Navigation to LoginScreen
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful signup
 import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
+import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,6 +15,7 @@ class SignupScreen extends StatefulWidget {
 
 class SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService(); // Instantiate AuthService
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -29,31 +31,57 @@ class SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // Function to handle signup process (simulated signup for now)
+  import 'package:flutter/material.dart';
+// ... other imports
+import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
+
+class SignupScreenState extends State<SignupScreen> {
+  // ... form keys, controllers, etc.
+
+  final AuthService _authService = AuthService(); // Instantiate AuthService
+
+  // Function to handle signup process using Firebase Auth
   Future<void> _signup() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true; // Show loading indicator
+        _isLoading = true;
       });
 
-      // Simulate signup delay (replace with actual Firebase auth later)
-      await Future.delayed(const Duration(seconds: 2));
+      // Call AuthService to signup with email and password
+      User? user = await _authService.signUpWithEmailAndPassword(
+        _emailController.text.trim(), // Trim whitespace from email
+        _passwordController.text.trim(), // Trim whitespace from password
+      );
 
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
 
-      // For now, just print signup details and navigate to home
-      print('Signup Email: ${_emailController.text}');
-      print('Signup Password: ${_passwordController.text}');
-
-      // Navigate to Home Screen after "successful" signup
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
-      );
+      if (user != null) {
+        // Signup successful
+        print('Signup successful. User UID: ${user.uid}');
+        // Navigate to Home Screen after successful signup
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
+        );
+      } else {
+        // Signup failed (error handled in AuthService and printed to console)
+        // You can show an error message to the user here (we'll add error display in next steps)
+        print('Signup failed.'); // For now, just print to console
+        // Optionally, display a SnackBar or AlertDialog to inform user of signup failure
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Signup failed. Please check your details and try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
+  // ... rest of the SignupScreenState code (build method, etc.)
+}
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
