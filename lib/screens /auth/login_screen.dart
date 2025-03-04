@@ -4,6 +4,7 @@ import 'package:bloom_app/constants/app_strings.dart';
 import 'package:bloom_app/components/custom_button.dart'; // Example custom button component (we might create this later)
 import 'package:bloom_app/screens/auth/signup_screen.dart'; // Example: Navigation to SignupScreen (create later)
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful login
+import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,7 +88,7 @@ class LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+                  decoration: customInputDecoration(
                     labelText: 'Email Address',
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)), // Rounded border
@@ -109,7 +110,7 @@ class LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword, // Toggle password visibility
-                  decoration: InputDecoration(
+                  decoration: customInputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton( // Icon button to toggle password visibility
