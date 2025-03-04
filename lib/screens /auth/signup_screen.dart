@@ -5,6 +5,7 @@ import 'package:bloom_app/screens/auth/login_screen.dart'; // Navigation to Logi
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful signup
 import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
 import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuthException
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -31,52 +32,77 @@ class SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  import 'package:flutter/material.dart';
-// ... other imports
-import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
-
-class SignupScreenState extends State<SignupScreen> {
-  // ... form keys, controllers, etc.
-
-  final AuthService _authService = AuthService(); // Instantiate AuthService
-
-  // Function to handle signup process using Firebase Auth
+ // Function to handle signup process using Firebase Auth
   Future<void> _signup() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Call AuthService to signup with email and password
-      User? user = await _authService.signUpWithEmailAndPassword(
-        _emailController.text.trim(), // Trim whitespace from email
-        _passwordController.text.trim(), // Trim whitespace from password
-      );
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (user != null) {
-        // Signup successful
-        print('Signup successful. User UID: ${user.uid}');
-        // Navigate to Home Screen after successful signup
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
+      try {
+        User? user = await _authService.signUpWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
         );
-      } else {
-        // Signup failed (error handled in AuthService and printed to console)
-        // You can show an error message to the user here (we'll add error display in next steps)
-        print('Signup failed.'); // For now, just print to console
-        // Optionally, display a SnackBar or AlertDialog to inform user of signup failure
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signup failed. Please check your details and try again.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (user != null) {
+          // Signup successful
+          print('Signup successful. User UID: ${user.uid}');
+          // Navigate to Home Screen after successful signup
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // Signup failed (generic failure - ideally should not reach here with error handling below)
+          _showSnackBar('Signup failed. Please check your details and try again.', Colors.redAccent);
+          print('Signup failed (generic - user null returned).');
+        }
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        String errorMessage = 'Signup failed. Please try again later.'; // Default generic error message
+
+        switch (e.code) {
+          case 'email-already-in-use':
+            errorMessage = 'Email address already in use. Please use a different email or log in.';
+            break;
+          case 'weak-password':
+            errorMessage = 'Weak password. Password should be at least 6 characters.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'Invalid email format. Please check your email.';
+            break;
+          // Add more cases for other Firebase Auth error codes you want to handle specifically during signup
+          default:
+            print('Unhandled Firebase Auth error code during signup: ${e.code}');
+            // Keep default generic error message for unhandled codes
+            break;
+        }
+        _showSnackBar(errorMessage, Colors.redAccent); // Show specific error message in SnackBar
+        print('Firebase Auth Signup Error: ${e.code} - ${e.message}'); // Keep logging detailed error for debugging
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showSnackBar('An unexpected error occurred during signup. Please try again later.', Colors.redAccent); // Generic error SnackBar
+        print('Generic Signup Error: $e'); // Log generic error
       }
     }
+  }
+
+  // Helper function to show SnackBar (same as in LoginScreenState)
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
   }
 
   // ... rest of the SignupScreenState code (build method, etc.)
