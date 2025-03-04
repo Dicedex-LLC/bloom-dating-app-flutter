@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:bloom_app/constants/app_colors.dart';
 import 'package:bloom_app/constants/app_strings.dart';
@@ -5,6 +6,7 @@ import 'package:bloom_app/components/custom_button.dart'; // Example custom butt
 import 'package:bloom_app/screens/auth/signup_screen.dart'; // Example: Navigation to SignupScreen (create later)
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful login
 import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
+import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
+  final AuthService _authService = AuthService(); // Instantiate AuthService
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true; // For toggling password visibility
@@ -27,31 +30,47 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Function to handle login process (currently just simulates login)
+  // Function to handle login process using Firebase Auth
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true; // Show loading indicator
+        _isLoading = true;
       });
 
-      // Simulate login delay (replace with actual Firebase auth later)
-      await Future.delayed(const Duration(seconds: 2));
+      // Call AuthService to sign in with email and password
+      User? user = await _authService.signInWithEmailAndPassword(
+        _emailController.text.trim(), // Trim whitespace from email
+        _passwordController.text.trim(), // Trim whitespace from password
+      );
 
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
 
-      // For now, just print email and password and navigate to home screen
-      print('Login Email: ${_emailController.text}');
-      print('Login Password: ${_passwordController.text}');
-
-      // Navigate to Home Screen after "successful" login
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
-      );
+      if (user != null) {
+        // Sign in successful
+        print('Login successful. User UID: ${user.uid}');
+        // Navigate to Home Screen after successful login
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()), // Replace with actual HomeScreen
+        );
+      } else {
+        // Sign in failed (error handled in AuthService and printed to console)
+        // You can show an error message to the user here (we'll add error display improvements later)
+        print('Login failed.'); // For now, just print to console
+        // Optionally, display a SnackBar or AlertDialog to inform user of login failure
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login failed. Please check your credentials and try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
+  // ... rest of the LoginScreenState code (build method, etc.)
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
