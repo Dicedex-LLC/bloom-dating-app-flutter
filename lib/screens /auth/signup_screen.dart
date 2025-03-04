@@ -140,7 +140,7 @@ class SignupScreenState extends State<SignupScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
+                  decoration: customInputDecoration(
                     labelText: 'Confirm Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
