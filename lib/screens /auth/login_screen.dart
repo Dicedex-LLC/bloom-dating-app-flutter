@@ -31,16 +31,8 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 import 'package:flutter/material.dart';
-// ... other imports
-import 'package:bloom_app/services/auth_service.dart'; // Import AuthService
-import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuthException
 
-class LoginScreenState extends State<LoginScreen> {
-  // ... form keys, controllers, etc.
-
-  final AuthService _authService = AuthService(); // Instantiate AuthService
-
-  // Function to handle login process using Firebase Auth
+// Function to handle login process using Firebase Auth
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
