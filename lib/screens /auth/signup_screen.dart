@@ -3,6 +3,7 @@ import 'package:bloom_app/constants/app_colors.dart';
 import 'package:bloom_app/constants/app_strings.dart';
 import 'package:bloom_app/screens/auth/login_screen.dart'; // Navigation to LoginScreen
 import 'package:bloom_app/screens/home/home_screen.dart'; // Example: Navigation to HomeScreen after successful signup
+import 'package:bloom_app/constants/app_styles.dart'; // Import app_styles
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -89,7 +90,7 @@ class SignupScreenState extends State<SignupScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+                  decoration: customInputDecoration(
                     labelText: 'Email Address',
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -110,7 +111,7 @@ class SignupScreenState extends State<SignupScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  decoration: InputDecoration(
+                  decoration: customInputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
