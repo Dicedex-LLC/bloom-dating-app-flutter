@@ -167,7 +167,7 @@ class SignupScreenState extends State<SignupScreen> {
                 // Sign Up Button
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
+                    : CustomButton(
                         onPressed: _signup,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
