@@ -135,7 +135,7 @@ class LoginScreenState extends State<LoginScreen> {
                 // Login Button
                 _isLoading // Show loading indicator if _isLoading is true
                     ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton( // Or use your CustomButton component here for styling consistency
+                    : CustomButton( // Or use your CustomButton component here for styling consistency
                         onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor, // Primary color from constants
