@@ -52,10 +52,10 @@ class SignupScreenState extends State<SignupScreen> {
         if (user != null) {
           // Signup successful
           print('Signup successful. User UID: ${user.uid}');
-          // Navigate to Home Screen after successful signup
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          // Navigate to Profile Creation Screen after successful signup (instead of HomeScreen directly)
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const ProfileCreationScreen()), // Navigate to ProfileCreationScreen
+        );
         } else {
           // Signup failed (generic failure - ideally should not reach here with error handling below)
           _showSnackBar('Signup failed. Please check your details and try again.', Colors.redAccent);
