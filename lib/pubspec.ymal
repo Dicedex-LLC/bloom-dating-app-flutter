@@ -6,6 +6,7 @@ dependencies:
   animated_text_kit: ^4.2.2 # Or latest version from pub.dev
   firebase_auth: ^4.15.3 # Check for the latest version on pub.dev
 flutter_tindercard: ^0.3.0 # Check for the latest version on pub.dev
+image_picker: ^0.8.9 # Check for the latest version on pub.dev
 
 dev_dependencies:
   flutter_test:
