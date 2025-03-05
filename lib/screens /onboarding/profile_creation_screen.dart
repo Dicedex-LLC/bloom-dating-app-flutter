@@ -7,6 +7,7 @@ import 'package:bloom_app/services/database_service.dart'; // Import DatabaseSer
 import 'package:bloom_app/models/profile.dart';         // Import Profile model
 import 'package:firebase_auth/firebase_auth.dart';       // Import FirebaseAuth for current user
 import 'package:bloom_app/screens/home/home_screen.dart';   // Navigation to HomeScreen
+import 'package:image_picker/image_picker.dart'; // Import image_picker
 
 class ProfileCreationScreen extends StatefulWidget {
   const ProfileCreationScreen({super.key});
@@ -25,6 +26,112 @@ class ProfileCreationScreenState extends State<ProfileCreationScreen> {
 
   final DatabaseService _databaseService = DatabaseService(); // Instantiate DatabaseService
 
+  List<File> _profileImages = []; // List to store selected image files
+  final ImagePicker _picker = ImagePicker(); // Instance of ImagePicker
+
+  // Function to pick image from gallery
+  Future<void> _pickImageFromGallery() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImages.add(File(pickedFile.path)); // Add selected File to the list
+      });
+    }
+  }
+
+  // Function to pick image from camera (optional for now, can add later)
+  // Future<void> _pickImageFromCamera() async { ... }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // ... (AppBar, backgroundColor, body - same as before) ...
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // ... (Title Text, Name, Age, Bio, Gender fields - same as before) ...
+
+                const SizedBox(height: 24.0),
+
+                // Profile Image Section
+                Text(
+                  'Add Profile Pictures (Optional)', // Make image upload optional initially
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textColorPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+
+                // Image Preview Area (Horizontal ListView)
+                SizedBox(
+                  height: 100.0, // Fixed height for image preview
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _profileImages.length + 1, // +1 for the "Add Image" button
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        // "Add Image" button
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: InkWell(
+                            onTap: _pickImageFromGallery, // Call gallery picker
+                            child: Container(
+                              width: 100.0,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(10.0),
+                                border: Border.all(color: Colors.grey.shade400),
+                              ),
+                              child: const Icon(Icons.add_photo_alternate, size: 40.0, color: Colors.grey),
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Image Preview
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.file(
+                              _profileImages[index - 1], // Access image from _profileImages list
+                              width: 100.0,
+                              height: 100.0,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 32.0),
+
+                // Create Profile Button (same as before)
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : CustomButton(
+                        onPressed: _createProfile,
+                        text: 'Create Profile',
+                      ),
+
+                const SizedBox(height: 24.0),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+  
   @override
   void dispose() {
     _nameController.dispose();
