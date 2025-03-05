@@ -1,10 +1,39 @@
+import 'dart:io'; // Import dart:io for File
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bloom_app/models/profile.dart'; // Import the Profile model
+import 'package:firebase_storage/firebase_storage.dart'; // Import Firebase Storage
 
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String profilesCollectionName = 'profiles'; // Collection name for user profiles
+  final FirebaseStorage _storage = FirebaseStorage.instance; // Instance of Firebase Storage
+  final String profileImagesFolderName = 'profile_images'; // Folder in Storage for profile images
 
+  // Function to upload profile images to Firebase Storage and return download URLs
+  Future<List<String>> uploadProfileImages(List<File> imageFiles, String userId) async {
+    List<String> downloadUrls = [];
+    try {
+      for (int i = 0; i < imageFiles.length; i++) {
+        File imageFile = imageFiles[i];
+        String imageName = 'profile_image_${i + 1}.jpg'; // Create a unique image name (e.g., profile_image_1.jpg, profile_image_2.jpg)
+        Reference storageReference = _storage.ref().child('$profileImagesFolderName/$userId/$imageName'); // Storage path
+
+        UploadTask uploadTask = storageReference.putFile(imageFile); // Upload the file
+        await uploadTask.whenComplete(() => null); // Wait for upload to complete
+
+        String downloadUrl = await storageReference.getDownloadURL(); // Get the download URL
+        downloadUrls.add(downloadUrl);
+        print('Image ${i + 1} uploaded to Firebase Storage. URL: $downloadUrl');
+      }
+      return downloadUrls;
+    } catch (e) {
+      print('Error uploading profile images to Firebase Storage: $e');
+      return []; // Return empty list in case of error
+    }
+  }
+
+  // ... (Rest of DatabaseService class - createUserProfile, getUserProfile, etc.) ...
+  
   // Function to create a new user profile in Firestore
   Future<void> createUserProfile(Profile profile) async {
     try {
@@ -42,7 +71,7 @@ class DatabaseService {
       return null; // Return null in case of error
     }
   }
-
+}
   // Function to get a list of profiles for swiping (excluding current user and liked/disliked profiles)
   // (This is a simplified version for demonstration - more complex filtering will be needed in a real app)
   Future<List<Profile>> getProfilesForSwiping() async {
