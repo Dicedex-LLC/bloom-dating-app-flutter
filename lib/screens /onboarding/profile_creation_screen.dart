@@ -140,7 +140,7 @@ class ProfileCreationScreenState extends State<ProfileCreationScreen> {
     super.dispose();
   }
 
-  Future<void> _createProfile() async {
+Future<void> _createProfile() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -149,40 +149,38 @@ class ProfileCreationScreenState extends State<ProfileCreationScreen> {
       try {
         User? currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser != null) {
+          List<String> imageUrls = []; // Initialize imageUrls list
+
+          if (_profileImages.isNotEmpty) { // Only upload images if there are any selected
+            imageUrls = await _databaseService.uploadProfileImages(_profileImages, currentUser.uid); // Upload images to Storage
+          }
+
           Profile profile = Profile(
-            userId: currentUser.uid, // Use current user's UID
+            userId: currentUser.uid,
             name: _nameController.text.trim(),
-            age: int.parse(_ageController.text.trim()), // Parse age as integer
+            age: int.parse(_ageController.text.trim()),
             bio: _bioController.text.trim(),
-            imageUrls: [], // Initially empty image URLs - we'll add image upload later
+            imageUrls: imageUrls, // Use the download URLs obtained from Storage
             gender: _gender,
-            location: null, // Location can be added later
-            interests: null, // Interests can be added later
+            location: null,
+            interests: null,
           );
 
-          await _databaseService.createUserProfile(profile); // Save profile to Firestore
+          await _databaseService.createUserProfile(profile);
 
           setState(() {
             _isLoading = false;
           });
 
-          print('Profile created successfully for user: ${currentUser.uid}');
-          // Navigate to Home Screen after successful profile creation
+          print('Profile created successfully with images. User UID: ${currentUser.uid}');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         } else {
-          setState(() {
-            _isLoading = false;
-          });
-          _showSnackBar('No user logged in. Please sign in first.', Colors.redAccent);
+          // ... (No user logged in SnackBar) ...
         }
       } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        _showSnackBar('Error creating profile. Please try again.', Colors.redAccent);
-        print('Error creating profile: $e'); // Log detailed error
+        // ... (Error SnackBar and error logging) ...
       }
     }
   }
