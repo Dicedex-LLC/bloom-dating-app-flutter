@@ -1,20 +1,23 @@
+name: myapp  # Add this line at the very top!  Replace 'your_app_name'
+
+environment:
+  sdk: '>=2.12.0 <4.0.0' # Changed to '2.12.0' to enable null safety
+
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.24.1 # Or your version
-  animated_text_kit: ^4.2.2 # Or latest version from pub.dev
-  firebase_auth: ^4.15.3 # Check for the latest version on pub.dev
-flutter_tindercard: ^0.3.0 # Check for the latest version on pub.dev
-image_picker: ^0.8.9 # Check for the latest version on pub.dev
+  firebase_core: ^2.24.1
+  animated_text_kit: ^4.2.2
+  firebase_auth: ^4.15.3
+  flutter_tindercard: any # Changed to 'any' to allow any version.  You can also try a newer version.
+  image_picker: ^0.8.9
 
 dev_dependencies:
-  flutter_test:
-   sdk: flutter
   flutter_lints: ^2.0.0
+
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/
     - assets/icons/
